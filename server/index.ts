@@ -13,8 +13,13 @@ const server: Server = http.createServer(
   (req: IncomingMessage, res: ServerResponse) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Request-Method', '*');
-    res.setHeader('Access-Control-Allow-Methods', '*');
+    res.setHeader("Access-Control-Allow-Methods", "*");
     res.setHeader('Access-Control-Allow-Headers', '*');
+    if (req.method === "OPTIONS") {
+      res.writeHead(200);
+      res.end();
+      return;
+  }
     if (req.method === "GET") {
       if (req.url === "/api") {
         const products = service.getProducts();
