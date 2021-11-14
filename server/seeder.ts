@@ -32,8 +32,8 @@ export = function seed() {
       dateEdited: "1636633307531",
     },
     {
-      productName: "jhonson bumbum",
-      productDescription: "bumbum for fkin",
+      productName: "jhonson",
+      productDescription: "hat",
       productVarieties: [
         {
           size: "large",
