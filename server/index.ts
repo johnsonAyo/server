@@ -1,9 +1,10 @@
 import url from "url";
 import http, { IncomingMessage, Server, ServerResponse } from "http";
 
-import { Product } from "./inteface";
 import service from "./service";
 import seeder from "./seeder";
+import Product from './product';
+
 /*
 implement your server code here
 */
@@ -22,19 +23,19 @@ const server: Server = http.createServer(
       } else if (req.url?.startsWith("/api?productId")) {
         const q = url.parse(req.url, true).query;
         const productId: string = q.productId+"";
-        const product = service.getProduct(productId);
-        if(!product) {
-          res.writeHead(404, { "Content-Type": "text/html" });
-          res.write("<h1>404 Product Not Found</h1>");
+        try {
+          const product = service.getProduct(productId);
+          res.writeHead(200, { "Content-Type": "application/json" });
+          res.write(JSON.stringify({success:true, data:product}));
           res.end();
-          return;
+        } catch (error:any) {
+          res.writeHead(404, { "Content-Type": "application/json" });
+          res.write(JSON.stringify({success:false, error: error.message}));
+          res.end();
         }
-        res.writeHead(200, { "Content-Type": "application/json" });
-        res.write(JSON.stringify(product));
-        res.end();
       } else {
-        res.writeHead(404, { "Content-Type": "text/html" });
-        res.write("<h1>404 Not Found</h1>");
+        res.writeHead(404, { "Content-Type": "application/json" });
+        res.write(JSON.stringify({success:false, error: "Invalid URL"}));
         res.end();
       }
     } else if (req.method === "POST") {
@@ -44,15 +45,21 @@ const server: Server = http.createServer(
           body += chunk;
         });
         req.on("end", () => {
-          let product: Product = JSON.parse(body);
-          product = service.addProduct(product);
-          res.writeHead(200, { "Content-Type": "application/json" });
-          res.write(JSON.stringify(product));
-          res.end();
+          let product: Product = new Product(JSON.parse(body));
+          try {
+            product = service.addProduct(product);
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.write(JSON.stringify({success:true, data:product}));
+            res.end();
+          } catch (error:any) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.write(JSON.stringify({success:false, error: error.message}));
+            res.end();
+          }
         });
       } else {
-        res.writeHead(404, { "Content-Type": "text/html" });
-        res.write("<h1>404 Not Found</h1>");
+        res.writeHead(404, { "Content-Type": "application/json" });
+        res.write(JSON.stringify({success:false, error: "Invalid URL"}));
         res.end();
       }
     } else if (req.method === "PUT") {
@@ -62,39 +69,45 @@ const server: Server = http.createServer(
           body += chunk;
         });
         req.on("end", () => {
-          let product: Product = JSON.parse(body);
-          product = service.updateProduct(product);
-          res.writeHead(200, { "Content-Type": "application/json" });
-          res.write(JSON.stringify(product));
-          res.end();
+          let product: Product = new Product(JSON.parse(body));
+          try {
+            service.updateProduct(product);
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.write(JSON.stringify({success:true, data:product}));
+            res.end();
+          } catch (error:any) {
+            res.writeHead(404, { "Content-Type": "application/json" });
+            res.write(JSON.stringify({success:false, error: error.message}));
+            res.end();
+          }
         });
       } else {
-        res.writeHead(404, { "Content-Type": "text/html" });
-        res.write("<h1>404 Not Found</h1>");
+        res.writeHead(404, { "Content-Type": "application/json" });
+        res.write(JSON.stringify({success:false, error: "Invalid URL"}));
         res.end();
       }
     } else if (req.method === "DELETE") {
       if (req.url?.startsWith("/api?productId")) {
         const q = url.parse(req.url, true).query;
         const productId: string = q.productId+"";
-        const deleteProduct = service.deleteProduct(productId);
-        if(!deleteProduct) {
-          res.writeHead(404, { "Content-Type": "text/html" });
-          res.write("<h1>404 Product Not Found</h1>");
+        try {
+          const product = service.deleteProduct(productId);
+          res.writeHead(201, { "Content-Type": "application/json" });
+          res.write(JSON.stringify({success:true, data:product}));
           res.end();
-          return;
+        } catch (error:any) {
+          res.writeHead(404, { "Content-Type": "application/json" });
+          res.write(JSON.stringify({success:false, error: error.message}));
+          res.end();
         }
-        res.writeHead(201, { "Content-Type": "application/json" });
-        res.write(JSON.stringify(deleteProduct));
-        res.end();
       } else {
-        res.writeHead(404, { "Content-Type": "text/html" });
-        res.write("<h1>404 Not Found</h1>");
+        res.writeHead(404, { "Content-Type": "application/json" });
+        res.write(JSON.stringify({success:false, error: "Invalid URL"}));
         res.end();
       }
     } else {
-      res.writeHead(404, { "Content-Type": "text/html" });
-      res.write("<h1>404 Not Found</h1>");
+      res.writeHead(404, { "Content-Type": "application/json" });
+      res.write(JSON.stringify({success:false, error: "Invalid URL"}));
       res.end();
     }
   }

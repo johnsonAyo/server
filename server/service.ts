@@ -1,20 +1,30 @@
 import fs from 'fs';
-import { Product } from './inteface';
-
-function getProducts() {
+import Product from './product';
+function getProducts() : Product[]{
     const products = fs.readFileSync(__dirname+'/../database.json', {encoding:'utf8', flag:'r'});
     return JSON.parse(products);
 }
 
-function getProduct(productId: string) :Product{
+function getProduct(productId: string): Product {
     const products = getProducts();
-    return products.find((product:Product) => product.productId ==  productId);
+    const product = products.find((product:Product) => product.productId ==  productId);
+    if(!product) {
+        throw new Error("Product Not Found");
+    }
+    return new Product(product);
 }
 
 function addProduct(newProduct: Product): Product {
     const data = fs.readFileSync(__dirname+'/../database.json', {encoding:'utf8', flag:'r'});
     const products = JSON.parse(data);
-    newProduct.productId = products[products.length - 1].productId +1;
+    if(!newProduct.productName) throw new Error("Product Name is required");
+    if(!newProduct.productDescription) throw new Error("Product Description is required");
+    if(!newProduct.size) throw new  Error("Product Size is required");
+    if(!newProduct.color) throw new Error("Product Color is required");
+    if(!newProduct.quantity) throw new  Error("Product Quantity is required");
+    if(!newProduct.images) throw new Error("Product Images is required");
+    if(!newProduct.price) throw new Error("Product Price is required");
+    newProduct.productId = products[products.length - 1].productId +1+"";
     newProduct.dateUploaded = Date.now().toString();
     newProduct.dateEdited = Date.now().toString();
     products.push(newProduct);
@@ -26,11 +36,18 @@ function updateProduct(newProduct: Product): Product {
     const data = fs.readFileSync(__dirname+'/../database.json', {encoding:'utf8', flag:'r'});
     const products = JSON.parse(data);
     let updateProduct: Product = products.find((product:Product) => product.productId ==  newProduct.productId);
+    if(!updateProduct) {
+        throw new Error("Product Not Found");
+    }
     products.map((product:Product) => {
         if(product.productId == newProduct.productId) {
             if(newProduct.productName) product.productName = newProduct.productName;
             if(newProduct.productDescription) product.productDescription = newProduct.productDescription;
-            if(newProduct.productVarieties) product.productVarieties = newProduct.productVarieties;
+            if(newProduct.size) product.size = newProduct.size;
+            if(newProduct.color) product.color = newProduct.color;
+            if(newProduct.quantity) product.quantity = newProduct.quantity;
+            if(newProduct.images) product.images = newProduct.images;
+            if(newProduct.price) product.price = newProduct.price;
             product.dateEdited = Date.now().toString();
             updateProduct = product;
         }
@@ -40,45 +57,16 @@ function updateProduct(newProduct: Product): Product {
     return updateProduct;
 }
 
-function deleteProduct(productId: string) {
+function deleteProduct(productId: string): Product {
     const data = fs.readFileSync(__dirname+'/../database.json', {encoding:'utf8', flag:'r'});
     const products = JSON.parse(data);
     const deleteProduct = products.find((product:Product) => product.productId ==  productId);
     if(!deleteProduct) {
-        return deleteProduct;
+        throw new Error("Product Not Found");
     }
     var newProducts = products.filter((product:Product) => product.productId !=  productId);
     fs.writeFileSync(__dirname+'/../database.json', JSON.stringify(newProducts));
     return deleteProduct;
 }
-
-
-// const newProduct: Product = {
-//     "productName": "nosemask",
-//     "productId" : "1",
-//     "productDescription": "masking",
-//     "productVarieties": [
-//       {
-//         "size": "large",
-//         "Id" : "1",
-//         "color": "orange",
-//         "quantity": "15",
-//         "images": ["https://ng.jumia.is/unsafe/fit-in/500x500/filters:fill(white)/product/83/453283/1.jpg?6332", "https://ng.jumia.is/unsafe/fit-in/500x500/filters:fill(white)/product/83/453283/2.jpg?6332"],
-//         "price": "23000"
-//       },
-//       {
-//         "size": "medium",
-//         "Id": "2",
-//         "color": "large",
-//         "quantity": "35",
-//         "images": ["https://ng.jumia.is/unsafe/fit-in/500x500/filters:fill(white)/product/86/690064/1.jpg?7852", "https://ng.jumia.is/unsafe/fit-in/500x500/filters:fill(white)/product/86/690064/3.jpg?3113"],
-//         "price": "35000"
-//       }
-//     ],
-//     "dateUploaded": "1636633307531",
-//     "dateEdited": "1636633307531"
-// }
-// const run = ()=> console.log(deleteProduct("1"));
-// console.log("ran");
 
 export = { getProducts, addProduct, updateProduct, deleteProduct, getProduct };

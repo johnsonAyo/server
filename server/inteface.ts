@@ -1,4 +1,4 @@
-interface Product { 
+interface ProductInterface { 
     productName: string; 
     productId: string
     productDescription: string; 
@@ -11,4 +11,4 @@ interface Product {
     dateEdited: string; 
 }
 
-export { Product };  // export interface  Product, ProductVarieties
+export { ProductInterface };  // export interface  Product
