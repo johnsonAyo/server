@@ -3,6 +3,7 @@ import http, { IncomingMessage, Server, ServerResponse } from "http";
 
 import { Product } from "./inteface";
 import service from "./service";
+import seeder from "./seeder";
 /*
 implement your server code here
 */
@@ -21,8 +22,15 @@ const server: Server = http.createServer(
       } else if (req.url?.startsWith("/api?productId")) {
         const q = url.parse(req.url, true).query;
         const productId: string = q.productId+"";
+        const product = service.getProduct(productId);
+        if(!product) {
+          res.writeHead(404, { "Content-Type": "text/html" });
+          res.write("<h1>404 Product Not Found</h1>");
+          res.end();
+          return;
+        }
         res.writeHead(200, { "Content-Type": "application/json" });
-        res.write(JSON.stringify(service.getProduct(productId)));
+        res.write(JSON.stringify(product));
         res.end();
       } else {
         res.writeHead(404, { "Content-Type": "text/html" });
@@ -69,8 +77,15 @@ const server: Server = http.createServer(
       if (req.url?.startsWith("/api?productId")) {
         const q = url.parse(req.url, true).query;
         const productId: string = q.productId+"";
-        res.writeHead(200, { "Content-Type": "application/json" });
-        res.write(JSON.stringify(service.deleteProduct(productId)));
+        const deleteProduct = service.deleteProduct(productId);
+        if(!deleteProduct) {
+          res.writeHead(404, { "Content-Type": "text/html" });
+          res.write("<h1>404 Product Not Found</h1>");
+          res.end();
+          return;
+        }
+        res.writeHead(201, { "Content-Type": "application/json" });
+        res.write(JSON.stringify(deleteProduct));
         res.end();
       } else {
         res.writeHead(404, { "Content-Type": "text/html" });
@@ -85,4 +100,7 @@ const server: Server = http.createServer(
   }
 );
 
-server.listen(3005);
+server.listen(3005).on("listening", () => { 
+  console.log("Server is running on port 3005");
+  seeder();
+});
