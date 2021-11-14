@@ -17,8 +17,9 @@ const server: Server = http.createServer(
     res.setHeader('Access-Control-Allow-Headers', '*');
     if (req.method === "GET") {
       if (req.url === "/api") {
+        const products = service.getProducts();
         res.writeHead(200, { "Content-Type": "application/json" });
-        res.write(JSON.stringify(service.getProducts()));
+        res.write(JSON.stringify({success:true, data:products}));
         res.end();
       } else if (req.url?.startsWith("/api?productId")) {
         const q = url.parse(req.url, true).query;
