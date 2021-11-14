@@ -1,16 +1,13 @@
 import fs from 'fs';
 import { Product } from './inteface';
 
-
-
 function getProducts() {
     const products = fs.readFileSync(__dirname+'/../database.json', {encoding:'utf8', flag:'r'});
     return JSON.parse(products);
 }
 
-function getProduct(productId: string) {
-    const data = fs.readFileSync(__dirname+'/../database.json', {encoding:'utf8', flag:'r'});
-    const products = JSON.parse(data);
+function getProduct(productId: string) :Product{
+    const products = getProducts();
     return products.find((product:Product) => product.productId ==  productId);
 }
 
@@ -46,9 +43,13 @@ function updateProduct(newProduct: Product): Product {
 function deleteProduct(productId: string) {
     const data = fs.readFileSync(__dirname+'/../database.json', {encoding:'utf8', flag:'r'});
     const products = JSON.parse(data);
+    const deleteProduct = products.find((product:Product) => product.productId ==  productId);
+    if(!deleteProduct) {
+        return deleteProduct;
+    }
     var newProducts = products.filter((product:Product) => product.productId !=  productId);
     fs.writeFileSync(__dirname+'/../database.json', JSON.stringify(newProducts));
-    return newProducts;
+    return deleteProduct;
 }
 
 
