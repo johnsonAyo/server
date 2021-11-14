@@ -1,1 +1,1 @@
-web: yarn tsc && yarn serve
+web: node lib/index.js
